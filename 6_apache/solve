@@ -1,0 +1,59 @@
+# Create directories for virtual hosts
+sudo mkdir -p /var/www/first.net/html
+sudo mkdir -p /var/www/second.net/html
+
+sudo mkdir /var/www/first.net/logs
+sudo mkdir /var/www/second.net/logs
+
+sudo chown -R $USER:$USER /var/www/first.net
+sudo chown -R $USER:$USER /var/www/second.net
+
+sudo chmod -R 755 /var/www
+
+# Create simple html files
+vim /var/www/first.net/html/index.html
+vim /var/www/second.net/html/index.html
+
+# Create config files for virtual hosts
+sudo cp /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/first.net.conf
+
+# Edit config for the first virtual host (first.net.conf)
+
+<VirtualHost *>
+  ServerName first.net
+  ServerAdmin webmaster@localhost
+  DocumentRoot /var/www/first.net/html
+  ErrorLog /var/www/first.net/logs/error.log
+  CustomLog /var/www/first.net/logs/access.log combined
+</VirtualHost>
+
+# Create config file for the second virtual host
+sudo cp /etc/apache2/sites-available/first.net.conf /etc/apache2/sites-available/second.net.conf
+
+# Edit config for the first virtual host (first.net.conf)
+
+<VirtualHost *>
+  ServerName second.net
+  ServerAdmin webmaster@localhost
+  DocumentRoot /var/www/second.net/html
+  ErrorLog /var/www/second.net/logs/error.log
+  CustomLog /var/www/second.net/logs/access.log combined
+</VirtualHost>
+
+# Activate new virtual hosts
+sudo a2ensite first.net.conf
+sudo a2ensite second.net.conf
+
+# Disable default host
+sudo a2dissite 000-default.conf
+
+# Restart Apache
+sudo systemctl restart apache2
+
+# Edit file /ets/hosts
+127.0.0.1 first.net
+127.0.0.1 second.net
+
+# Now we can run these commands from hostA and router:
+wget first.net
+wget second.net

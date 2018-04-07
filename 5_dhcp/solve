@@ -1,0 +1,31 @@
+# Edit file /etc/dhcp/dhcpd.conf
+
+option routers 192.168.0.2;
+option subnet-mask 255.255.255.0;
+
+subnet 192.168.0.0 netmask 255.255.255.0 {
+	range 192.168.0.100 192.168.0.200;
+}
+
+subnet 192.168.1.0 netmask 255.255.255.0 {
+	range 192.168.1.100 192.168.1.200;
+}
+
+# Restart service and apply changes
+sudo service isc-dhcp-server restart
+
+# Show DHCP logs on hosts
+sudo cat /var/log/syslog | grep -iE 'dhcp'
+
+# On the HostA: edit file /etc/network/interfaces
+
+source /etc/network/interfaces.d/*
+
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet dhcp
+
+# Restart network and apply changes
+sudo /etc/init.d/networking restart

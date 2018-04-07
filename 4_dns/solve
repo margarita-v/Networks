@@ -1,0 +1,72 @@
+# Edit file /etc/bind/named.conf.default-zones
+
+# Add zones
+zone "net" IN {
+	type master;
+	file "/etc/bind/db.home.net";
+};
+
+zone "168.192.in-addr.arpa" IN {
+	type master;
+	file "/etc/bind/168.192.in-addr.arpa";
+};
+
+# Direct zones (file /etc/bind/db.home.net)
+$TTL 3600
+
+@ IN SOA home.net. admin.net. (
+	20180510 ; Serial
+	1d ; Refresh
+	1h ; Retry
+	1w ; Expire
+	2h ; Negative Cache TTL
+)
+
+@ IN NS home.net
+
+home IN A 127.0.0.1
+
+hosta IN A 192.168.0.1
+hostb IN A 192.168.1.1
+
+# Inverse zones (file /etc/bind/168.192.in-addr.arpa)
+$TTL 3600
+
+@ IN SOA home.net. admin.net. (
+	20180510 ; Serial
+	1d ; Refresh
+	1h ; Retry
+	1w ; Expire
+	2h ; Negative Cache TTL
+)
+
+@ IN NS home.net.
+
+1.0 IN PTR hosta.net.
+0.0 IN PTR hostb.net.
+
+# Edit file /etc/resolv.conf
+nameserver 127.0.0.1
+
+# Restart service and apply changes
+sudo service bind9 restart
+
+# Now we can ping all hosts from router. 
+ping home.net # ping router itself
+ping hosta.net
+ping hostb.net
+
+#######################################
+
+# HostA: edit file /etc/resolv.conf
+nameserver 192.168.0.2
+
+# HostB: edit file /etc/resolv.conf
+nameserver 192.168.1.2
+
+# Now hosts can ping each other by domain names.
+# From hostA:
+ping hostb.net
+
+# From hostB:
+ping hosta.net

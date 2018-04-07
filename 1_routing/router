@@ -1,0 +1,31 @@
+# Edit file /etc/network/interfaces
+
+source /etc/network/interfaces.d/*
+
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet static
+address 192.168.0.2
+netmask 255.255.255.0
+
+auto eth1
+iface eth1 inet static
+address 192.168.1.2
+netmask 255.255.255.0
+
+# Enable routing
+echo 1 > /proc/sys/net/ipv4/ip_forward
+
+# Restart network and apply changes
+sudo /etc/init.d/networking restart
+
+# Check result: ping hostB
+ping 192.168.1.1
+
+# Check via netcat: start listening on port 8080
+nc -lp 8080
+
+# If the hostB is listening on port 8080
+nc 192.168.1.1 8080

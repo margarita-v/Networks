@@ -1,0 +1,57 @@
+# Install and setup OpenVPN from the router
+sudo apt install openvpn
+
+mkdir /etc/openvpn/easy-rsa/
+cp -r /usr/share/easy-rsa/* /etc/openvpn/easy-rsa/
+cd /etc/openvpn/easy-rsa/
+
+# You may setup vars if it needed or you can set vars as defaults
+vim vars
+
+# You could change these params
+export KEY_COUNTRY="US"
+export KEY_PROVINCE="CA"
+export KEY_CITY="SanFrancisco"
+export KEY_ORG="Fort-Funston"
+export KEY_EMAIL="me@myhost.mydomain"
+
+# Login as root
+sudo su
+
+source ./vars
+./clean-all
+./build-ca
+
+# Generate certificates for client and server
+./build-key-server server
+./build-key client
+
+# Generate Diffie-Hellman key
+./build-dh
+
+# Generate key for the tls-authentication
+openvpn --genkey --secret keys/ta.key
+
+# All genereted keys are stored at /etc/openvpn/easy-rsa/keys/
+# Copy certificates and server keys to the OpenVPN directory
+cd keys
+cp server.crt server.key ca.crt dh2048.pem ta.key /etc/openvpn/
+
+# Copy these files to the client: client.crt; client.key; ca.crt; ta.key
+scp client.crt client.key ca.crt ta.key username@host:/tmp
+
+# Copy and unzip config files for the OpenVPN server
+cp /usr/share/doc/openvpn/examples/sample-config-files/server.conf.gz /etc/openvpn/
+gzip -d /etc/openvpn/server.conf.gz
+
+# Edit file /etc/openvpn/server.conf (if you need)
+
+# On client side: copy and setup client.conf
+cp /usr/share/doc/openvpn/examples/sample-config-files/client.conf /etc/openvpn/
+
+# Run OpenVPN from client and server
+openvpn /etc/openvpn/server.conf
+openvpn /etc/openvpn/client.conf
+
+# Check for a new interface (tun0)
+ip a

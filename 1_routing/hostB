@@ -1,0 +1,12 @@
+# Setup IP and route
+sudo ip address add 192.168.1.1/24 dev eth0
+sudo ip route add default via 192.168.1.2 dev eth0
+
+# Check result: ping hostA
+ping 192.168.0.1
+
+# Check via netcat: start listening on port 8080
+nc -lp 8080
+
+# If the hostA is listening on port 8080
+nc 192.168.0.1 8080

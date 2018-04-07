@@ -1,0 +1,10 @@
+# From hostA: edit file /etc/ssh/sshd_config
+PermitRootLogin yes
+
+# Restart ssh service
+sudo service ssh restart
+
+# From hostB:
+ssh-keygen
+ssh-copy-id root@{A-ip}
+ssh root@{A-ip}
